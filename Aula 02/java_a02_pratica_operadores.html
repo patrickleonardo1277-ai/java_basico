@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prática Guiada — Operadores · Aula 02</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;color:#1e293b;background:#eff6ff;min-height:100vh;padding:22px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:11px}
+
+/* cabeçalho */
+.pg-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.pg-title{font-size:17px;font-weight:600}
+.pg-meta{font-size:12px;color:#64748b;margin-top:2px}
+.pg-time{font-size:12px;font-weight:600;background:#bfdbfe;border:1px solid #93c5fd;padding:4px 12px;border-radius:8px;color:#1d4ed8}
+
+/* barra de progresso */
+.prog-row{display:flex;align-items:center;gap:9px}
+.pb{flex:1;height:7px;background:#bfdbfe;border-radius:4px;overflow:hidden}
+.pf{height:100%;background:#2563eb;border-radius:4px;transition:width .4s ease;width:0%}
+.pt{font-size:12px;font-weight:600;color:#64748b;min-width:60px;text-align:right}
+
+/* separadores de nível */
+.nivel-sep{display:flex;align-items:center;gap:10px;margin:4px 0}
+.nivel-line{flex:1;height:1px;background:#93c5fd}
+.nivel-badge{font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.nivel-badge.b{background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.nivel-badge.m{background:#fef9c3;color:#92400e;border:1px solid #fde047}
+.nivel-badge.a{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+
+/* cards dos passos */
+.sc{border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#fff;transition:border-color .2s}
+.sc.done-c{border-color:#86efac}
+.sc.open-c{border-color:#60a5fa}
+.sh{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;cursor:pointer;user-select:none;transition:background .15s}
+.sh:hover{background:#f8fafc}
+.sc.open-c .sh{background:#eff6ff}
+.chk{width:21px;height:21px;border-radius:6px;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .18s;cursor:pointer;background:#fff}
+.chk:hover{border-color:#2563eb;background:#eff6ff}
+.chk.done{background:#22c55e;border-color:#22c55e}
+.chk svg{display:none}.chk.done svg{display:block}
+.si{flex:1}
+.sn2{font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+.st{font-size:13px;font-weight:600;color:#1e293b;line-height:1.3}
+.stm{font-size:11px;color:#94a3b8;margin-top:2px}
+.cv{color:#94a3b8;font-size:11px;margin-top:4px;transition:transform .22s;flex-shrink:0}
+.sc.open-c .cv{transform:rotate(180deg)}
+.sb{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.sc.open-c .sb{max-height:4000px}
+.sbi{padding:0 13px 16px;border-top:1px solid #f1f5f9}
+
+/* instruções */
+.il{display:flex;flex-direction:column;gap:6px;margin:11px 0}
+.ii{display:flex;gap:9px;font-size:13px;color:#475569;line-height:1.55;align-items:flex-start}
+.in{width:19px;height:19px;min-width:19px;border-radius:5px;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px}
+code{font-family:'Courier New',monospace;font-size:12px;background:#f1f5f9;padding:1px 5px;border-radius:3px;border:1px solid #e2e8f0}
+
+/* dica */
+.tip{background:#eff6ff;border-left:3px solid #2563eb;padding:8px 12px;font-size:12px;color:#1e3a8a;line-height:1.5;margin-top:10px}
+.tip strong{color:#1d4ed8;font-weight:600}
+
+/* botão marcar concluído */
+.mb{display:inline-flex;align-items:center;gap:5px;background:#f8fafc;border:1px solid #cbd5e1;color:#64748b;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .18s;margin-top:12px}
+.mb:hover{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.mb.done-btn{background:#f0fdf4;color:#15803d;border-color:#86efac;pointer-events:none}
+
+/* caixa de conclusão */
+.sbox{background:#eff6ff;border:1px solid #93c5fd;border-radius:14px;padding:20px;text-align:center;display:none}
+.sbox.show{display:block}
+.sbox h3{font-size:16px;font-weight:600;color:#2563eb;margin-bottom:6px}
+.sbox p{font-size:13px;color:#1e3a8a;line-height:1.6}
+
+/* ══════════════════════════════════════
+   GABARITO — botão + sanfona
+   ══════════════════════════════════════ */
+.gabarito-wrap{margin-top:14px}
+
+.gab-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#1e293b;color:#e2e8f0;
+  border:2px solid transparent;
+  border-radius:8px;padding:8px 16px;
+  font-size:12px;font-weight:700;
+  cursor:pointer;font-family:inherit;letter-spacing:.01em;
+  transition:background .18s,border-color .18s,box-shadow .18s;
+  user-select:none;
+}
+.gab-btn:hover{background:#0f172a;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.gab-btn.open{
+  background:#0f172a;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(96,165,250,.14);
+}
+
+.gab-icon{font-size:14px;line-height:1}
+.gab-arr{
+  width:14px;height:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .28s ease;opacity:.7;
+}
+.gab-btn.open .gab-arr{transform:rotate(180deg)}
+
+/* corpo sanfona */
+.gab-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .45s cubic-bezier(.4,0,.2,1),opacity .3s ease;
+  opacity:0;margin-top:8px;
+}
+.gab-body.open{max-height:3000px;opacity:1}
+
+/* alerta */
+.gab-alert{
+  display:flex;align-items:flex-start;gap:8px;
+  background:#fffbeb;border:1px solid #fcd34d;
+  border-radius:8px 8px 0 0;border-bottom:none;
+  padding:9px 14px;font-size:11px;color:#78350f;line-height:1.55;
+}
+
+/* barra do código */
+.gab-codebar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#21262d;border:1px solid #30363d;
+  border-top:none;border-bottom:none;
+  padding:8px 14px;
+}
+.gab-lang{font-family:'Courier New',monospace;font-size:11px;color:#f89820;font-weight:700;letter-spacing:1px}
+.gab-copy{background:none;border:1px solid #30363d;color:#8b949e;font-size:11px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:system-ui,sans-serif;transition:all .18s}
+.gab-copy:hover{border-color:#60a5fa;color:#60a5fa}
+
+/* bloco de código */
+.gab-code{
+  background:#0d1117;
+  border:1px solid #30363d;border-top:none;
+  border-radius:0 0 10px 10px;
+  padding:16px 20px;
+  font-family:'Courier New',monospace;
+  font-size:12px;line-height:1.9;
+  color:#c9d1d9;overflow-x:auto;white-space:pre;margin:0;
+}
+
+/* syntax highlighting — tema Dracula */
+.gk{color:#ff79c6}
+.gt{color:#8be9fd}
+.gv{color:#bd93f9}
+.gs{color:#f1fa8c}
+.gc{color:#6272a4;font-style:italic}
+.gf{color:#50fa7b}
+.gl{color:#ffb86c}
+.ga{color:#ff79c6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="pg-header">
+    <div>
+      <div class="pg-title">Prática guiada — Operadores em Java ⚙️</div>
+      <div class="pg-meta">Siga os passos no IDE. Marque cada um quando terminar. Básico → Médio → Avançado.</div>
+    </div>
+    <span class="pg-time">60 min disponíveis</span>
+  </div>
+
+  <div class="prog-row">
+    <div class="pb"><div class="pf" id="pf"></div></div>
+    <div class="pt" id="pt">0 / 7</div>
+  </div>
+
+  <div id="steps"></div>
+
+  <div class="sbox" id="sbox">
+    <h3>⚙️ Tópico 2 concluído!</h3>
+    <p>Operadores aritméticos, relacionais, lógicos e de atribuição — dominados.<br>Próximo: <strong>Tópico 3 — Entrada de Dados com Scanner!</strong></p>
+  </div>
+
+</div>
+
+<script>
+const STEPS = [
+
+/* ══ BÁSICO 1 ════════════════════════════════════════════════ */
+{
+  nivel:'b',
+  title:'Operadores aritméticos básicos',
+  time:'8 min',
+  instrs:[
+    'Crie <code>Aritmeticos.java</code> e declare duas variáveis inteiras: <code>int a = 17, b = 5;</code>',
+    'Calcule e imprima os 5 operadores: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> e <code>%</code>',
+    'Observe o resultado de <code>17 / 5</code> — é 3, não 3.4! A divisão inteira descarta a parte decimal',
+    'Agora experimente <code>17 % 5</code> — deve ser 2 (o resto da divisão 17÷5)',
+    'Troque para <code>double a = 17.0, b = 5.0;</code> e veja como os resultados mudam',
+  ],
+  tip:'<strong>Módulo (%) com números negativos:</strong> em Java, o sinal do resultado do % segue o dividendo: <code>-7 % 3</code> dá <code>-1</code>, não <code>2</code>. Se precisar de módulo matemático sempre positivo, use <code>Math.floorMod(-7, 3)</code> que retorna <code>2</code>.',
+  gab:
+`<span class="gk">public class</span> <span class="gl">Aritmeticos</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+
+        <span class="gc">// Declaração com dois valores na mesma linha (válido em Java)</span>
+        <span class="gt">int</span> a = <span class="gv">17</span>, b = <span class="gv">5</span>;
+
+        <span class="gc">// Os parênteses em (a + b) são necessários para que o + seja aritmético
+        // — sem eles, Java concatenaria o número à string como texto</span>
+        System.out.println(<span class="gs">"a + b = "</span> + (a + b));  <span class="gc">// 22</span>
+        System.out.println(<span class="gs">"a - b = "</span> + (a - b));  <span class="gc">// 12</span>
+        System.out.println(<span class="gs">"a * b = "</span> + (a * b));  <span class="gc">// 85</span>
+
+        <span class="gc">// CUIDADO: int / int → descarta a parte decimal (divisão inteira!)
+        // 17 ÷ 5 = 3.4, mas Java retorna apenas 3</span>
+        System.out.println(<span class="gs">"a / b = "</span> + (a / b));  <span class="gc">// 3  (não 3.4!)</span>
+
+        <span class="gc">// % = módulo = resto da divisão inteira: 17 = 3×5 + 2 → resto = 2</span>
+        System.out.println(<span class="gs">"a % b = "</span> + (a % b));  <span class="gc">// 2</span>
+
+        <span class="gc">// Com double: agora a divisão retorna o valor real</span>
+        <span class="gt">double</span> x = <span class="gv">17.0</span>, y = <span class="gv">5.0</span>;
+        System.out.println(<span class="gs">"x / y = "</span> + (x / y));  <span class="gc">// 3.4 ✓</span>
+    }
+}`
+},
+
+/* ══ BÁSICO 2 ════════════════════════════════════════════════ */
+{
+  nivel:'b',
+  title:'Incremento, decremento e atribuição composta',
+  time:'8 min',
+  instrs:[
+    'Crie <code>Incremento.java</code> com <code>int x = 10;</code>',
+    'Teste <code>x++</code> (pós-incremento) e <code>++x</code> (pré-incremento) dentro de um <code>println</code> — observe a diferença no valor impresso',
+    'Use <code>x += 5</code>, <code>x -= 3</code>, <code>x *= 2</code>, <code>x /= 4</code> e imprima <code>x</code> após cada operação',
+    'Declare <code>int cont = 0;</code> e incremente com <code>cont++</code> cinco vezes, imprimindo a cada vez',
+    'Observe: <code>int y = 5; System.out.println(y++);</code> imprime 5 (não 6!). Por quê?',
+  ],
+  tip:'<strong>Pós vs Pré incremento:</strong> <code>y++</code> retorna o valor ANTES de incrementar. <code>++y</code> incrementa ANTES e retorna o novo valor. Na prática, use <code>i++</code> no for — é o padrão Java. A diferença só importa quando o operador está dentro de uma expressão maior.',
+  gab:
+`<span class="gk">public class</span> <span class="gl">Incremento</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+
+        <span class="gt">int</span> x = <span class="gv">10</span>;
+
+        <span class="gc">// PÓS-incremento (x++): usa o valor ATUAL, depois incrementa
+        // → imprime 10, e SÓ DEPOIS x se torna 11</span>
+        System.out.println(<span class="gs">"x++: "</span> + x++);  <span class="gc">// imprime 10 | x agora é 11</span>
+
+        <span class="gc">// PRÉ-incremento (++x): incrementa PRIMEIRO, depois usa o valor
+        // x era 11, vira 12 antes de ser impresso</span>
+        System.out.println(<span class="gs">"++x: "</span> + ++x);  <span class="gc">// x vira 12 | imprime 12</span>
+
+        <span class="gc">// Atribuição composta: forma curta de x = x OP valor</span>
+        x = <span class="gv">10</span>;                                   <span class="gc">// reinicia para demonstração</span>
+        x += <span class="gv">5</span>;  System.out.println(<span class="gs">"+=5: "</span> + x); <span class="gc">// x = 10+5 = 15</span>
+        x -= <span class="gv">3</span>;  System.out.println(<span class="gs">"-=3: "</span> + x); <span class="gc">// x = 15-3 = 12</span>
+        x *= <span class="gv">2</span>;  System.out.println(<span class="gs">"*=2: "</span> + x); <span class="gc">// x = 12*2 = 24</span>
+        x /= <span class="gv">4</span>;  System.out.println(<span class="gs">"/=4: "</span> + x); <span class="gc">// x = 24/4 = 6</span>
+        x %= <span class="gv">4</span>;  System.out.println(<span class="gs">"%%=4: "</span>+ x); <span class="gc">// x = 6%4  = 2</span>
+    }
+}`
+},
+
+/* ══ MÉDIO 1 ══════════════════════════════════════════════════ */
+{
+  nivel:'m',
+  title:'Operadores relacionais e booleanos',
+  time:'8 min',
+  instrs:[
+    'Crie <code>Relacionais.java</code> com <code>int idade = 20; double salario = 3500.0; boolean cnh = true;</code>',
+    'Use os 6 operadores relacionais (<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>) e armazene cada resultado em variáveis boolean',
+    'Combine condições com <code>&&</code> (E): ex. <code>boolean podeAlugar = idade >= 18 && cnh;</code>',
+    'Combine com <code>||</code> (OU): ex. <code>boolean beneficio = salario &lt; 2500 || idade &gt; 60;</code>',
+    'Use <code>!</code> (NÃO) para inverter: <code>boolean semCNH = !cnh;</code> — imprima todos',
+  ],
+  tip:'<strong>Curto-circuito (short-circuit):</strong> em <code>&&</code>, se a primeira condição for false, a segunda NÃO é avaliada. Em <code>||</code>, se a primeira for true, a segunda é ignorada. Exemplo útil: <code>obj != null && obj.length() > 0</code> — o segundo lado só roda se obj não for null.',
+  gab:
+`<span class="gk">public class</span> <span class="gl">Relacionais</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+
+        <span class="gt">int</span>     idade   = <span class="gv">20</span>;
+        <span class="gt">double</span>  salario = <span class="gv">3500.0</span>;
+        <span class="gt">boolean</span> cnh     = <span class="gk">true</span>;
+
+        <span class="gc">// ── RELACIONAIS: comparam dois valores e retornam boolean ──</span>
+        System.out.println(<span class="gs">"idade >= 18: "</span>    + (idade >= <span class="gv">18</span>));    <span class="gc">// true</span>
+        System.out.println(<span class="gs">"salario > 5000: "</span> + (salario > <span class="gv">5000</span>));  <span class="gc">// false</span>
+        System.out.println(<span class="gs">"idade == 20: "</span>    + (idade == <span class="gv">20</span>));    <span class="gc">// true</span>
+
+        <span class="gc">// ── LÓGICOS: combinam condições booleanas ──────────────────
+        // &&  = E: ambas precisam ser true para o resultado ser true
+        // ||  = OU: basta UMA ser true
+        // !   = NÃO: inverte o valor booleano</span>
+
+        <span class="gc">// Pode alugar carro? Precisa ter 18+ E ter CNH</span>
+        <span class="gt">boolean</span> podeAlugar = idade >= <span class="gv">18</span> && cnh;
+
+        <span class="gc">// Tem benefício? Salário baixo OU é idoso (basta um dos dois)</span>
+        <span class="gt">boolean</span> beneficio  = salario &lt; <span class="gv">2500</span> || idade &gt; <span class="gv">60</span>;
+
+        <span class="gc">// ! inverte: cnh é true, então !cnh é false</span>
+        <span class="gt">boolean</span> semCNH     = !cnh;
+
+        System.out.println(<span class="gs">"Pode alugar carro: "</span> + podeAlugar);  <span class="gc">// true</span>
+        System.out.println(<span class="gs">"Tem benefício: "</span>     + beneficio);   <span class="gc">// false</span>
+        System.out.println(<span class="gs">"Sem CNH: "</span>           + semCNH);      <span class="gc">// false</span>
+    }
+}`
+},
+
+/* ══ MÉDIO 2 ══════════════════════════════════════════════════ */
+{
+  nivel:'m',
+  title:'Precedência de operadores',
+  time:'9 min',
+  instrs:[
+    'Crie <code>Precedencia.java</code> e calcule estas expressões SEM parênteses primeiro, tentando prever o resultado mentalmente',
+    'Teste: <code>2 + 3 * 4</code> — é 20 ou 14? (lembre: * tem precedência sobre +)',
+    'Teste: <code>10 - 4 / 2 + 1</code> — calcule passo a passo: primeiro /2=2, depois 10-2+1=9',
+    'Agora adicione parênteses para forçar outra ordem: <code>(10 - 4) / (2 + 1)</code> — deve dar 2',
+    'Teste: <code>true || false && false</code> — é true (&& tem precedência sobre ||)',
+  ],
+  tip:'<strong>Precedência resumida (maior → menor):</strong> <code>!</code> → <code>* / %</code> → <code>+ -</code> → <code>&gt; &lt; &gt;= &lt;=</code> → <code>== !=</code> → <code>&&</code> → <code>||</code>. Na dúvida, use parênteses — eles tornam o código mais claro e evitam surpresas. Código legível > código "esperto".',
+  gab:
+`<span class="gk">public class</span> <span class="gl">Precedencia</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+
+        <span class="gc">// ── ARITMÉTICA: * / % têm precedência sobre + - ────────────</span>
+
+        <span class="gc">// Java calcula 3*4=12 PRIMEIRO, depois 2+12 = 14 (não 20!)</span>
+        System.out.println(<span class="gv">2</span> + <span class="gv">3</span> * <span class="gv">4</span>);        <span class="gc">// 14</span>
+
+        <span class="gc">// Parênteses forçam a soma primeiro: (2+3)=5, depois 5*4 = 20</span>
+        System.out.println((<span class="gv">2</span> + <span class="gv">3</span>) * <span class="gv">4</span>);      <span class="gc">// 20</span>
+
+        <span class="gc">// Passo a passo: 4/2=2 primeiro, depois 10-2+1=9</span>
+        System.out.println(<span class="gv">10</span> - <span class="gv">4</span> / <span class="gv">2</span> + <span class="gv">1</span>);  <span class="gc">// 9</span>
+
+        <span class="gc">// Com parênteses: (10-4)=6, (2+1)=3, depois 6/3 = 2</span>
+        System.out.println((<span class="gv">10</span>-<span class="gv">4</span>) / (<span class="gv">2</span>+<span class="gv">1</span>));  <span class="gc">// 2</span>
+
+        <span class="gc">// ── LÓGICA: ! > && > || ────────────────────────────────────</span>
+
+        <span class="gc">// && tem precedência sobre || → Java avalia (false && false)=false PRIMEIRO
+        // depois: true || false = true</span>
+        System.out.println(<span class="gk">true</span> || <span class="gk">false</span> && <span class="gk">false</span>); <span class="gc">// true</span>
+
+        <span class="gc">// ! tem a maior precedência: !true=false, depois false || true = true</span>
+        System.out.println(!<span class="gk">true</span> || <span class="gk">true</span>);            <span class="gc">// true</span>
+
+        <span class="gc">// Parênteses: (true || true)=true, depois !true = false</span>
+        System.out.println(!(<span class="gk">true</span> || <span class="gk">true</span>));          <span class="gc">// false</span>
+
+        <span class="gc">// ── RELACIONAL antes de LÓGICO ─────────────────────────────
+        // Java avalia x>3 e y&lt;20 primeiro (relacionais), depois combina com &&</span>
+        <span class="gt">int</span> x = <span class="gv">5</span>, y = <span class="gv">10</span>;
+        System.out.println(x > <span class="gv">3</span> && y &lt; <span class="gv">20</span>);  <span class="gc">// true && true → true</span>
+    }
+}`
+},
+
+/* ══ AVANÇADO 1 ═══════════════════════════════════════════════ */
+{
+  nivel:'a',
+  title:'Calculadora de notas com operadores',
+  time:'9 min',
+  instrs:[
+    'Crie <code>MediaNotas.java</code> com Scanner e leia 4 notas (<code>double</code>) — N1, N2, N3, N4',
+    'Calcule a média ponderada: N1 e N2 valem 2, N3 vale 3, N4 vale 3 — total de pesos: 10',
+    'Use o operador ternário para classificar: <code>String sit = media >= 6.0 ? "APROVADO" : "REPROVADO";</code>',
+    'Calcule a nota mínima necessária na N4: <code>notaMin = (6.0 * 10 - N1*2 - N2*2 - N3*3) / 3.0</code>',
+    'Imprima a média com 2 casas decimais e exiba a nota mínima se ainda não aprovado',
+  ],
+  tip:'<strong>Operador ternário</strong> <code>condição ? valorSeTrue : valorSeFalse</code> é uma forma compacta de if/else para atribuição. Use com moderação — ternários aninhados ficam ilegíveis. Bom para classificações binárias simples: <code>aprovado ? "SIM" : "NÃO"</code>.',
+  gab:
+`<span class="ga">import</span> java.util.Scanner;
+
+<span class="gk">public class</span> <span class="gl">MediaNotas</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+        <span class="gl">Scanner</span> sc = <span class="gk">new</span> <span class="gl">Scanner</span>(System.in);
+
+        <span class="gc">// Lê as 4 notas — print (sem ln) mantém cursor na mesma linha</span>
+        System.out.print(<span class="gs">"N1 (peso 2): "</span>); <span class="gt">double</span> n1 = sc.nextDouble();
+        System.out.print(<span class="gs">"N2 (peso 2): "</span>); <span class="gt">double</span> n2 = sc.nextDouble();
+        System.out.print(<span class="gs">"N3 (peso 3): "</span>); <span class="gt">double</span> n3 = sc.nextDouble();
+        System.out.print(<span class="gs">"N4 (peso 3): "</span>); <span class="gt">double</span> n4 = sc.nextDouble();
+
+        <span class="gc">// Média ponderada: soma(nota × peso) ÷ soma(pesos)
+        // 10.0 força divisão real — sem ele seria divisão inteira</span>
+        <span class="gt">double</span> media = (n1*<span class="gv">2</span> + n2*<span class="gv">2</span> + n3*<span class="gv">3</span> + n4*<span class="gv">3</span>) / <span class="gv">10.0</span>;
+
+        <span class="gc">// Operador ternário: condição ? valorTrue : valorFalse
+        // Equivalente a: if(media>=6.0) sit="APROVADO ✓"; else sit="REPROVADO ✗";</span>
+        <span class="gl">String</span> sit = media >= <span class="gv">6.0</span> ? <span class="gs">"APROVADO ✓"</span> : <span class="gs">"REPROVADO ✗"</span>;
+
+        <span class="gc">// Isola a nota mínima necessária na N4 da equação da média:
+        // (n1*2 + n2*2 + n3*3 + n4*3) / 10 = 6.0
+        // → n4*3 = 60 - n1*2 - n2*2 - n3*3
+        // → n4   = (60 - n1*2 - n2*2 - n3*3) / 3</span>
+        <span class="gt">double</span> minN4 = (<span class="gv">6.0</span>*<span class="gv">10</span> - n1*<span class="gv">2</span> - n2*<span class="gv">2</span> - n3*<span class="gv">3</span>) / <span class="gv">3.0</span>;
+
+        System.out.printf(<span class="gs">"%nMédia ponderada: %.2f%n"</span>, media);
+        System.out.printf(<span class="gs">"Situação: %s%n"</span>, sit);
+
+        <span class="gc">// Só exibe a nota mínima se ainda não foi aprovado</span>
+        <span class="gk">if</span> (media &lt; <span class="gv">6.0</span>)
+            System.out.printf(<span class="gs">"Precisaria %.2f na N4 para aprovação%n"</span>, minN4);
+    }
+}`
+},
+
+/* ══ AVANÇADO 2 ═══════════════════════════════════════════════ */
+{
+  nivel:'a',
+  title:'Operações bit a bit e flags booleanas',
+  time:'8 min',
+  instrs:[
+    'Crie <code>Permissoes.java</code> e simule um sistema de permissões usando constantes int com potências de 2',
+    'Declare: <code>final int LER=1, ESCREVER=2, EXECUTAR=4, ADMIN=8;</code>',
+    'Crie um perfil combinando permissões com <code>|</code> (OR bit a bit): <code>int perfil = LER | ESCREVER;</code>',
+    'Verifique se tem uma permissão com <code>&amp;</code> (AND bit a bit): <code>boolean temLer = (perfil &amp; LER) != 0;</code>',
+    'Adicione EXECUTAR com <code>perfil |= EXECUTAR;</code> e remova ESCREVER com <code>perfil &amp;= ~ESCREVER;</code>',
+  ],
+  tip:'<strong>Flags com bits</strong> é um padrão clássico em sistemas de permissões (Unix, Android etc.). Potências de 2 funcionam como "interruptores" independentes. <code>|</code> liga um bit, <code>&amp;</code> testa, <code>~</code> inverte todos os bits (complemento), <code>&amp;= ~FLAG</code> desliga um bit específico.',
+  gab:
+`<span class="gk">public class</span> <span class="gl">Permissoes</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+
+        <span class="gc">// Cada permissão é uma potência de 2 — ocupa um BIT diferente
+        // Em binário: LER=0001, ESCREVER=0010, EXECUTAR=0100, ADMIN=1000
+        // Isso permite combinar permissões sem conflito</span>
+        <span class="gk">final</span> <span class="gt">int</span> LER      = <span class="gv">1</span>;   <span class="gc">// 0001</span>
+        <span class="gk">final</span> <span class="gt">int</span> ESCREVER = <span class="gv">2</span>;   <span class="gc">// 0010</span>
+        <span class="gk">final</span> <span class="gt">int</span> EXECUTAR = <span class="gv">4</span>;   <span class="gc">// 0100</span>
+        <span class="gk">final</span> <span class="gt">int</span> ADMIN    = <span class="gv">8</span>;   <span class="gc">// 1000</span>
+
+        <span class="gc">// | (OR bit a bit): liga os bits de AMBOS os operandos
+        // LER|ESCREVER = 0001|0010 = 0011 = 3 (tem as duas permissões)</span>
+        <span class="gt">int</span> perfil = LER | ESCREVER;
+
+        <span class="gc">// & (AND bit a bit): o resultado tem 1 apenas onde AMBOS têm 1
+        // Se (perfil & FLAG) != 0 → aquele bit está ligado → tem a permissão</span>
+        System.out.println(<span class="gs">"Tem leitura:  "</span> + ((perfil & LER)      != <span class="gv">0</span>)); <span class="gc">// true</span>
+        System.out.println(<span class="gs">"Tem execução: "</span> + ((perfil & EXECUTAR) != <span class="gv">0</span>)); <span class="gc">// false</span>
+
+        <span class="gc">// |= adiciona uma permissão (liga o bit sem mexer nos outros)
+        // perfil = 0011 | 0100 = 0111 (agora tem LER + ESCREVER + EXECUTAR)</span>
+        perfil |= EXECUTAR;
+        System.out.println(<span class="gs">"Após +EXEC: "</span> + ((perfil & EXECUTAR) != <span class="gv">0</span>)); <span class="gc">// true</span>
+
+        <span class="gc">// &= ~FLAG remove uma permissão:
+        // ~ESCREVER inverte todos os bits de 0010 → 1101
+        // perfil & 1101 = desliga o bit de ESCREVER, mantém os outros</span>
+        perfil &= ~ESCREVER;
+        System.out.println(<span class="gs">"Após -ESCR: "</span> + ((perfil & ESCREVER) != <span class="gv">0</span>)); <span class="gc">// false</span>
+    }
+}`
+},
+
+/* ══ AVANÇADO 3 ═══════════════════════════════════════════════ */
+{
+  nivel:'a',
+  title:'Mini desafio — placar de jogo com operadores',
+  time:'9 min',
+  instrs:[
+    'Crie <code>Placar.java</code> com Scanner — leia os nomes dos dois times e seus gols',
+    'Use operadores relacionais e lógicos para determinar o resultado: vitória, empate ou derrota',
+    'Calcule saldo de gols: <code>saldo = golsA - golsB</code> — use <code>%+d</code> no printf para mostrar o sinal',
+    'Calcule pontuação: vitória = 3 pts, empate = 1 pt, derrota = 0 pt — para ambos os times',
+    'Determine o resultado com operador ternário e imprima o boletim completo',
+  ],
+  tip:'<strong>Ternário aninhado</strong> <code>a > b ? X : (a == b ? Y : Z)</code> é aceitável para 3 casos simples como vitória/empate/derrota. Para mais de 3 casos, prefira if/else if encadeado — fica muito mais legível. <code>%+d</code> sempre exibe o sinal: <code>+3</code> ou <code>-1</code>.',
+  gab:
+`<span class="ga">import</span> java.util.Scanner;
+
+<span class="gk">public class</span> <span class="gl">Placar</span> {
+    <span class="gk">public static void</span> <span class="gf">main</span>(String[] args) {
+        <span class="gl">Scanner</span> sc = <span class="gk">new</span> <span class="gl">Scanner</span>(System.in);
+
+        <span class="gc">// next() lê uma única palavra — ok para nomes de times sem espaço
+        // Para times com nome composto, usaríamos nextLine() com cuidado de buffer</span>
+        System.out.print(<span class="gs">"Time A: "</span>); <span class="gl">String</span> tA = sc.next();
+        System.out.print(<span class="gs">"Time B: "</span>); <span class="gl">String</span> tB = sc.next();
+        System.out.print(<span class="gs">"Gols A: "</span>); <span class="gt">int</span>    gA = sc.nextInt();
+        System.out.print(<span class="gs">"Gols B: "</span>); <span class="gt">int</span>    gB = sc.nextInt();
+
+        <span class="gc">// Ternário: condição ? valorSeTrue : valorSeFalse
+        // Aninhado: se gA > gB → 3pts; se igual → 1pt; se menor → 0pt</span>
+        <span class="gt">int</span> ptsA = gA &gt; gB ? <span class="gv">3</span> : (gA == gB ? <span class="gv">1</span> : <span class="gv">0</span>);
+        <span class="gt">int</span> ptsB = gB &gt; gA ? <span class="gv">3</span> : (gB == gA ? <span class="gv">1</span> : <span class="gv">0</span>);
+
+        <span class="gc">// Ternário retornando String — legível porque são só 3 casos</span>
+        <span class="gl">String</span> res = gA &gt; gB ? tA + <span class="gs">" venceu!"</span>
+                   : (gA == gB ? <span class="gs">"Empate!"</span>
+                   : tB + <span class="gs">" venceu!"</span>);
+
+        <span class="gc">// %n = quebra de linha portável (equivale a \n em qualquer SO)
+        // %+d = sempre exibe o sinal: +3, -2, +0</span>
+        System.out.printf(<span class="gs">"%n%s %d x %d %s%n"</span>, tA, gA, gB, tB);
+        System.out.printf(<span class="gs">"Resultado : %s%n"</span>,            res);
+        System.out.printf(<span class="gs">"Saldo A   : %+d | Saldo B: %+d%n"</span>, gA-gB, gB-gA);
+        System.out.printf(<span class="gs">"Pontos A  : %d   | Pontos B: %d%n"</span>,  ptsA, ptsB);
+
+        sc.close();
+    }
+}`
+}
+
+]; /* fim STEPS */
+
+/* ────────────────────────────────────────────────────────────
+   RENDERIZAÇÃO E LÓGICA
+   ──────────────────────────────────────────────────────────── */
+let done = new Set();
+
+function build() {
+  const list = document.getElementById('steps');
+  let prevNivel = '';
+
+  STEPS.forEach((s, i) => {
+
+    /* separador de nível */
+    if (s.nivel !== prevNivel) {
+      const sep = document.createElement('div');
+      sep.className = 'nivel-sep';
+      const labels = { b:'🟢 Nível Básico', m:'🟡 Nível Médio', a:'🔴 Nível Avançado' };
+      sep.innerHTML = `<div class="nivel-line"></div><span class="nivel-badge ${s.nivel}">${labels[s.nivel]}</span><div class="nivel-line"></div>`;
+      list.appendChild(sep);
+      prevNivel = s.nivel;
+    }
+
+    /* instruções numeradas */
+    const instrHtml = s.instrs
+      .map((t, j) => `<div class="ii"><div class="in">${j+1}</div><span>${t}</span></div>`)
+      .join('');
+
+    /* sanfona do gabarito */
+    const gabHtml = `
+      <div class="gabarito-wrap">
+        <button class="gab-btn" id="gbtn-${i}" onclick="togGab(${i})">
+          <span class="gab-icon">📋</span>
+          Gabarito comentado
+          <svg class="gab-arr" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="gab-body" id="gbody-${i}">
+          <div class="gab-alert">
+            ⚠️&nbsp;<strong>Dica:</strong> tente resolver sozinho antes de consultar — o aprendizado acontece no esforço!
+          </div>
+          <div class="gab-codebar">
+            <span class="gab-lang">JAVA — gabarito comentado</span>
+            <button class="gab-copy" id="gcopy-${i}" onclick="cpGab(${i})">Copiar</button>
+          </div>
+          <div class="gab-code" id="gcode-${i}">${s.gab}</div>
+        </div>
+      </div>`;
+
+    /* card */
+    const card = document.createElement('div');
+    card.className = 'sc' + (i === 0 ? ' open-c' : '');
+    card.id = 'sc-' + i;
+    card.innerHTML = `
+      <div class="sh" onclick="tog(${i})">
+        <div class="chk" id="chk-${i}" onclick="event.stopPropagation();mk(${i})">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="si">
+          <div class="sn2">Passo ${i+1} de ${STEPS.length}</div>
+          <div class="st">${s.title}</div>
+          <div class="stm">${s.time}</div>
+        </div>
+        <span class="cv">${i === 0 ? '▲' : '▼'}</span>
+      </div>
+      <div class="sb">
+        <div class="sbi">
+          <div class="il">${instrHtml}</div>
+          ${gabHtml}
+          <div class="tip">${s.tip}</div>
+          <button class="mb" id="mb-${i}" onclick="mk(${i})">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M2 6.5l3.5 3.5 5.5-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Marcar como concluído
+          </button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+/* abre/fecha passo principal */
+function tog(i) {
+  const c = document.getElementById('sc-' + i);
+  const wasOpen = c.classList.contains('open-c');
+  document.querySelectorAll('.sc').forEach(x => {
+    x.classList.remove('open-c');
+    x.querySelector('.cv').textContent = '▼';
+  });
+  if (!wasOpen) {
+    c.classList.add('open-c');
+    c.querySelector('.cv').textContent = '▲';
+  }
+}
+
+/* abre/fecha sanfona do gabarito */
+function togGab(i) {
+  const btn  = document.getElementById('gbtn-'  + i);
+  const body = document.getElementById('gbody-' + i);
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  btn.classList.toggle('open',  !open);
+}
+
+/* copia o código do gabarito */
+function cpGab(i) {
+  const code = document.getElementById('gcode-' + i);
+  const btn  = document.getElementById('gcopy-' + i);
+  navigator.clipboard.writeText(code.innerText);
+  btn.textContent = 'Copiado!';
+  setTimeout(() => btn.textContent = 'Copiar', 2000);
+}
+
+/* marca passo como concluído */
+function mk(i) {
+  if (done.has(i)) return;
+  done.add(i);
+  document.getElementById('chk-' + i).classList.add('done');
+  document.getElementById('sc-'  + i).classList.add('done-c');
+  const mb = document.getElementById('mb-' + i);
+  mb.classList.add('done-btn');
+  mb.innerHTML = `<svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M2 6.5l3.5 3.5 5.5-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>Concluído!`;
+  upd();
+  if (i < STEPS.length - 1) {
+    document.querySelectorAll('.sc').forEach(x => {
+      x.classList.remove('open-c');
+      x.querySelector('.cv').textContent = '▼';
+    });
+    const nx = document.getElementById('sc-' + (i + 1));
+    nx.classList.add('open-c');
+    nx.querySelector('.cv').textContent = '▲';
+    setTimeout(() => nx.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  }
+  if (done.size === STEPS.length) document.getElementById('sbox').classList.add('show');
+}
+
+function upd() {
+  document.getElementById('pf').style.width = Math.round((done.size / STEPS.length) * 100) + '%';
+  document.getElementById('pt').textContent  = done.size + ' / ' + STEPS.length;
+}
+
+build();
+upd();
+</script>
+
+<div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #93c5fd;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:999;gap:12px">
+  <a href="java_a02_pratica_tipos_dados.html"
+     style="display:inline-flex;align-items:center;gap:7px;background:#f8fafc;color:#64748b;font-size:12px;font-weight:600;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;border:1px solid #e2e8f0;transition:background .15s"
+     onmouseover="this.style.background='#f1f5f9'"
+     onmouseout="this.style.background='#f8fafc'">← Tópico 1</a>
+  <div style="font-size:11px;color:#94a3b8;font-family:'Courier New',monospace;text-align:center;flex:1">Aula 02 · Tópico 2 · Operadores</div>
+  <a href="java_a02_pratica_scanner.html"
+     style="display:inline-flex;align-items:center;gap:7px;background:#2563eb;color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;transition:background .15s"
+     onmouseover="this.style.background='#1d4ed8'"
+     onmouseout="this.style.background='#2563eb'">Próximo Tópico →</a>
+</div>
+<div style="height:52px"></div>
+</body>
+</html>
