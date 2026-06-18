@@ -9,6 +9,7 @@ public class Reverso {
          for (int i = 50; i> v.length; i--){
              System.out.println("Reverso " + v[i] +".");
          }
+         leitor.close();
 
     }
 }

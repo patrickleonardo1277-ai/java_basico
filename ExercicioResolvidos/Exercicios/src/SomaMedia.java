@@ -24,6 +24,6 @@ public class SomaMedia {
         }
         System.out.println("As notas acima da média são : " + acima_media);
 
-
+        leitor.close();
     }
 }
